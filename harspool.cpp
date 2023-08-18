@@ -1,63 +1,72 @@
 #include <iostream>
-#include <vector>
 #include <string>
-#include <unordered_map>
+#include <cstring>
 
-class Horspool {
-private:
-    std::unordered_map<char, int> shiftTable;
-    std::string pattern;
+using namespace std;
 
-    void generateShiftTable() {
-        int m = pattern.length();
-        for (int i = 0; i < m - 1; ++i) {
-            shiftTable[pattern[i]] = m - 1 - i;
+const int ALPHABET_SIZE = 256;
+
+// To generate shift table
+void generateShiftTable(const string& pattern, int shiftTable[]) {
+    int m = pattern.length();
+
+    // Initialising the shift table
+    for (int i = 0; i < ALPHABET_SIZE; ++i) {
+        shiftTable[i] = m;
+    }
+
+    // Fill in the shift values
+    for (int i = 0; i < m - 1; ++i) {
+        shiftTable[pattern[i]] = m - 1 - i;
+    }
+}
+
+// string search function
+int horspoolSearch(const string& text, const string& pattern) {
+    int n = text.length();
+    int m = pattern.length();
+
+    if (n < m) {
+        return -1; // no match
+    }
+
+    int shiftTable[ALPHABET_SIZE];
+    generateShiftTable(pattern, shiftTable);
+
+    int i = m - 1;
+    int j;
+
+    while (i < n) {
+        j = m - 1;
+
+        while (j >= 0 && text[i] == pattern[j]) {
+            --i;
+            --j;
         }
-    }
 
-public:
-    Horspool(const std::string& pat) : pattern(pat) {
-        generateShiftTable();
-    }
-
-    std::vector<int> search(const std::string& text) {
-        std::vector<int> positions;
-        int n = text.length();
-        int m = pattern.length();
-        int i = m - 1;
-
-        while (i < n) {
-            int k = 0;
-            while (k < m && pattern[m - 1 - k] == text[i - k]) {
-                ++k;
-            }
-
-            if (k == m) {
-                positions.push_back(i - m + 1);
-            }
-
-            i += shiftTable[text[i]];
+        if (j == -1) {
+            return i + 1; // Match found
         }
 
-        return positions;
+        i += shiftTable[text[i]];
     }
-};
+
+    return -1; // No match found
+}
 
 int main() {
-    std::string text = "ABCDABCDABDE";
-    std::string pattern = "AB";
+    string text = "Betty got some butter but butter was bitter";
+    string pattern = "bitter";
 
-    Horspool horspool(pattern);
-    std::vector<int> positions = horspool.search(text);
+    cout<<"Text in which the pattern has to be matched:"<<text<<endl;
+    cout<<"The pattern to be matched: "<<pattern<<endl;
 
-    if (positions.empty()) {
-        std::cout << "Pattern not found in the text." << std::endl;
+    int result = horspoolSearch(text, pattern);
+
+    if (result != -1) {
+        cout << "Pattern found at index " << result << endl;
     } else {
-        std::cout << "Pattern found at positions:";
-        for (int pos : positions) {
-            std::cout << " " << pos;
-        }
-        std::cout << std::endl;
+        cout << "Pattern not found in the text." << endl;
     }
 
     return 0;
