@@ -1,34 +1,42 @@
 #include <bits/stdc++.h>
+#define N 4
 using namespace std;
-
-
 class queens{
     public:
-    bool isSafe(vector<vector<int> > board,
-			int row, int col);
-	bool solveNQUtil(vector<vector<int> >& board, int col);
-    vector<vector<int> > nQueen(int n);
-    vector<vector<int> > result;
+    bool solveNQ();
+    void printSolution(int board[N][N]);
+    bool isSafe(int board[N][N], int row, int col);
+    bool solveNQUtil(int board[N][N], int col);
+    
+    
 }que;
 
+void queens:: printSolution(int board[N][N])
+{
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++)
+		if(board[i][j])
+			cout << "Q ";
+		else cout<<". ";
+		printf("\n");
+	}
+}
 
-bool queens::isSafe(vector<vector<int> > board,
-			int row, int col)
+bool queens:: isSafe(int board[N][N], int row, int col)
 {
 	int i, j;
-	int N = board.size();
 
-	
+	// Check this row on left side
 	for (i = 0; i < col; i++)
 		if (board[row][i])
 			return false;
 
-	
+	// Check upper diagonal on left side
 	for (i = row, j = col; i >= 0 && j >= 0; i--, j--)
 		if (board[i][j])
 			return false;
 
-	
+	// Check lower diagonal on left side
 	for (i = row, j = col; j >= 0 && i < N; i++, j--)
 		if (board[i][j])
 			return false;
@@ -36,70 +44,52 @@ bool queens::isSafe(vector<vector<int> > board,
 	return true;
 }
 
-
-bool queens:: solveNQUtil(vector<vector<int> >& board, int col)
+bool queens:: solveNQUtil(int board[N][N], int col)
 {
 	
-	int N = board.size();
-	if (col == N) {
-		vector<int> v;
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < N; j++) {
-				if (board[i][j] == 1)
-					v.push_back(j + 1);
-			}
-		}
-		result.push_back(v);
+	if (col >= N)
 		return true;
-	}
 
-	
-	bool res = false;
 	for (int i = 0; i < N; i++) {
+		
 		
 		if (isSafe(board, i, col)) {
 			
+			// Place this queen in board[i][col]
 			board[i][col] = 1;
 
-			
-			res = solveNQUtil(board, col + 1) || res;
+			// recur to place rest of the queens
+			if (solveNQUtil(board, col + 1))
+				return true;
 
-			
-			board[i][col] = 0; 
+			board[i][col] = 0; // BACKTRACK
 		}
 	}
 
-	
-	return res;
+	return false;
 }
 
 
-
-vector<vector<int> > queens:: nQueen(int n)
+bool queens:: solveNQ()
 {
-	result.clear();
-	vector<vector<int> > board(n, vector<int>(n, 0));
+	int board[N][N] = { { 0, 0, 0, 0 },
+						{ 0, 0, 0, 0 },
+						{ 0, 0, 0, 0 },
+						{ 0, 0, 0, 0 } };
 
 	if (solveNQUtil(board, 0) == false) {
-		return {};
+		cout << "Solution does not exist";
+		return false;
 	}
 
-	sort(result.begin(), result.end());
-	return result;
+	printSolution(board);
+	return true;
 }
 
-
+// Driver program to test above function
 int main()
 {
-	int n = 4;
-	vector<vector<int> > v =que.nQueen(n);
-
-	for (auto ar : v) {
-		cout << "[";
-		for (auto it : ar)
-			cout << it << " ";
-		cout << "]";
-	}
-
+	que.solveNQ();
 	return 0;
 }
+
